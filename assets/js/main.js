@@ -16,7 +16,6 @@ window.onload = function () {
       const method = row.insertCell()
       const host = row.insertCell()
       const headers = row.insertCell()
-      const body = row.insertCell()
       const target = row.insertCell()
       const onssl = row.insertCell()
       const blocked = row.insertCell()
@@ -27,7 +26,6 @@ window.onload = function () {
       method.innerText = data.method
       host.innerText = data.host
       headers.innerText = data.headers
-      body.innerText = data.body
       target.innerText = data.target
       onssl.innerText = data.onssl
       blocked.innerText = data.blocked
@@ -35,9 +33,6 @@ window.onload = function () {
 
       headers.style.fontSize = '5px'
       headers.style.width = '100px'
-
-      body.style.fontSize = '5px'
-      body.style.width = '100px'
     }
   })
 }

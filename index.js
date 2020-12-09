@@ -52,19 +52,12 @@ async function mtx (req, res, bounce) {
   const [blocked] = await db.select('*').where('ip', ip).from('blacklist')
   const target = settings.bounce[host]
 
-  let body = ''
-  req.on('data', (chunk) => {
-    body += chunk.toString()
-  })
-
-  req.on('end', async () => {
-    await db.insert({
-      code, ip, method: req.method,
-      host, headers: JSON.stringify(req.headers),
-      body: body, target, blocked: !!blocked,
-      onssl: req.socket.localPort === 443
-    }).into('log')
-  })
+  await db.insert({
+    code, ip, method: req.method,
+    host, headers: JSON.stringify(req.headers),
+    target, blocked: !!blocked,
+    onssl: req.socket.localPort === 443
+  }).into('log')
 
   if (blocked) {
     res.end(settings.locale.blocked.replace('$ip', ip).replace('$host', host).replace('$code', code).replace('$reason', blocked.reason))

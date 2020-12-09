@@ -10,7 +10,6 @@ create table log (
   method varchar(30) not null,
   host text not null,
   headers text,
-  body text,
   target text,
   onssl boolean,
   blocked boolean,
