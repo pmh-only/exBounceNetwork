@@ -9,6 +9,7 @@ let settings
 
 const { parse } = require('yaml')
 const bouncy = require('bouncy')
+const knex = require('knex')
 const uuid = require('uuid').v4
 
 getSetting()
@@ -23,9 +24,18 @@ const s2 = settings.ssl ? bouncy({ cert: readFileSync('./cert/cert.pem').toStrin
 s1.listen(80)
 if (s2) s2.listen(443)
 
+if (settings.webmgr) require('./webmgr')
+
+const db = knex({ client: 'mysql', connection: {
+  host: 'localhost',
+  port: 3306,
+  user: 'exbounce',
+  database: 'exbounce'
+}})
+
 // ---
 
-function mtx (req, res, bounce) {
+async function mtx (req, res, bounce) {
   pin2.set()
   setTimeout(() => pin2.set(0), 100)
 
@@ -39,14 +49,20 @@ function mtx (req, res, bounce) {
 
   const host = req.headers.host
   const rstr = settings.locale[req.socket.localPort !== 443 ? 'log' : 'slog'].replace('$ip', ip).replace('$host', host).replace('$code', code)
+  const [blocked] = await db.select('*').where('ip', ip).from('blacklist')
+  const target = settings.bounce[host]
+  await db.insert({
+    code, ip, method: req.method,
+    host, headers: JSON.stringify(req.headers),
+    body: req.body, target, blocked: !!blocked,
+    onssl: req.socket.localPort === 443
+  }).into('log')
 
-  if (settings.blacklist.find((str) => ip.match(new RegExp(str)))) {
-    res.end(settings.locale.blocked.replace('$ip', ip).replace('$host', host).replace('$code', code))
+  if (blocked) {
+    res.end(settings.locale.blocked.replace('$ip', ip).replace('$host', host).replace('$code', code).replace('$reason', blocked.reason))
     log(rstr.replace('$togo', '[!blocked]'))
     return
   }
-
-  const target = settings.bounce[host]
 
   if (!target) {
     res.end(settings.locale.notpermitted.replace('$ip', ip).replace('$host', host).replace('$code', code))

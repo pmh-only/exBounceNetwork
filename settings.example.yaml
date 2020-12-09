@@ -2,22 +2,20 @@
 
 #-- ssl 지원 (./cert/cert.pem에 공개키, ./cert/key.pem에 개인키를 넣어주세요)
 ssl: false
+gpio: false
+webmgr: true
 
 #-- 바운스를 어디다 할껀지
 bounce:
   localhost: 8080 # localhost'로 접속했을때 8080포트에서 돌아가고 있는 웹서버로 연결시켜 줌
   something.url: 'nope' # 'something.url'로 접속했을때 'nope' 메세지 보내기
 
-#-- 블렉리스트
-blacklist:
-  - 123.123.123.123 # 모든 사이트에 접근이 불가능
-  - 321.321.321.321
-
 #-- 로케일
 # 한글은 크롬에서는 안되는걸로 보입니다
 locale:
   blocked: | # 블렉리스트에 있는 IP가 접속할 시 나오는 메세지
     Sorry, your ip ($ip) has been punished by our pipeline
+    Reason: "$reason"
     
     Support:
     - email: changeme@settings.yaml
